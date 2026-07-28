@@ -111,6 +111,16 @@ def extrair_resultados_dia(url_dia, data_str):
     resp = requests.get(url_dia, headers=HEADERS, timeout=30)
     resp.raise_for_status()
 
+    # ===== DEBUG =====
+    print("URL acessada :", resp.url)
+    print("Status HTTP  :", resp.status_code)
+
+    with open("pagina_recebida.html", "w", encoding="utf-8") as f:
+        f.write(resp.text)
+
+    print("HTML salvo em pagina_recebida.html")
+    # =================
+
     soup = BeautifulSoup(resp.text, "html.parser")
 
     print("=" * 50)
@@ -120,8 +130,6 @@ def extrair_resultados_dia(url_dia, data_str):
     print("=" * 50)
 
     resultados = []
-
-    soup = BeautifulSoup(resp.text, "html.parser")
 
     table_wraps = soup.find_all("div", class_="table-wrap")
 

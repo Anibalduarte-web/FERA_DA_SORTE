@@ -199,7 +199,7 @@ body {
 <body>
 
 <div class="container">
-    <img src="Site-Fera da Sorte.png" alt="Fera da Sorte">
+    <img src="site-fera-da-sorte.png" alt="Fera da Sorte">
 
     <div class="area-click" onclick="toggleResultados()"></div>
     <div class="area-palpite" onclick="abrirPalpites()"></div>
@@ -288,28 +288,9 @@ window.onload = function () {
     box.style.display = "none";
     box.style.visibility = "hidden";
 
-    console.log("Atualizando resultados...");
+    console.log("Carregando resultados...");
 
-    fetch("/atualizar")
-        .then(function (r) {
-            if (!r.ok)
-                throw new Error("Erro ao atualizar");
-
-            return r.text();
-        })
-        .then(function () {
-
-            console.log("Atualização concluída!");
-
-            // AGORA SIM
-            carregarResultadosHoje();
-
-        })
-        .catch(function (e) {
-
-            console.error(e);
-
-        });
+    carregarResultadosHoje();
 
 }
 
