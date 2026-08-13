@@ -45,6 +45,16 @@ body {
     border: none; /* Apenas para debug, remova depois */
     cursor: pointer; z-index: 10;
 }
+.area-sonhos {
+    position: absolute;
+    top: 48%;
+    left: 74%;
+    width: 20%;
+    height: 8%;
+    border: none;
+    cursor: pointer;
+    z-index: 15;
+}
 /* =======================================================
    OUTROS RESULTADOS
    ======================================================= */
@@ -404,6 +414,7 @@ body {
 
     <div class="area-click" onclick="toggleResultados()"></div>
     <div class="area-palpite" onclick="abrirPalpites()"></div>
+    <div class="area-sonhos" onclick="abrirSonhosPalpites()"></div>
     <div class="area-outros" onclick="abrirOutrosResultados()"></div>
 
     <div id="tabela" class="tabela-box">
@@ -457,6 +468,14 @@ function getEmoji(bicho) {
 
 function abrirPalpites() {
     window.open("https://www.youtube.com/channel/UCekfnO-XM6IAepw7gzwukWA", "_blank");
+}
+function abrirSonhosPalpites() {
+
+    window.open(
+        "https://estreladasorte.site/auto-cadastro?ref1=MzAy&ref2=MzE=",
+        "_blank"
+    );
+
 }
 
 function fecharTabela() {
