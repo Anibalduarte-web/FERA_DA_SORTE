@@ -45,16 +45,6 @@ body {
     border: none; /* Apenas para debug, remova depois */
     cursor: pointer; z-index: 10;
 }
-.area-sonhos {
-    position: absolute;
-    top: 48%;
-    left: 74%;
-    width: 20%;
-    height: 8%;
-    border: none;
-    cursor: pointer;
-    z-index: 15;
-}
 /* =======================================================
    OUTROS RESULTADOS
    ======================================================= */
@@ -217,196 +207,90 @@ body {
     .grid-resultados::-webkit-scrollbar { width: 0px; } /* Oculta barra no Celular */
 }
 /* =======================================================
-   OUTROS RESULTADOS — CALENDÁRIO
+   OUTROS RESULTADOS — TABELA TEMPORÁRIA
    ======================================================= */
 
-.modal-outros {
+.tabela-box.historico .botoes-filtro,
+.tabela-box.historico .cabecalho {
     display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.80);
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
 }
 
-.calendario-outros {
-    width: 380px;
-    max-width: 92%;
-    background: #111;
-    border: 2px solid #c9a227;
-    border-radius: 14px;
-    padding: 20px;
-    box-sizing: border-box;
-    box-shadow: 0 0 25px rgba(201, 162, 39, 0.45);
+.tabela-box.historico .grid-resultados {
+    padding-right: 4px;
 }
 
-.titulo-calendario {
-    text-align: center;
+.historico-titulo {
+    background: #1a1a1a;
     color: #FFD700;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 18px;
-}
-
-.navegacao-calendario {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 14px;
-}
-
-.navegacao-calendario button {
-    background: #1d1609;
-    color: #FFD700;
-    border: 1px solid #c9a227;
-    border-radius: 7px;
-    padding: 7px 12px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.navegacao-calendario button:hover {
-    background: #c9a227;
-    color: #111;
-}
-
-#mesAno {
-    flex: 1;
-    text-align: center;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.dias-semana,
-.dias-calendario {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-}
-
-.dias-semana div {
-    text-align: center;
-    color: #c9a227;
-    font-size: 11px;
-    font-weight: bold;
-    padding: 4px 0;
-}
-
-.dias-calendario button {
-    min-height: 38px;
-    background: #1b160e;
-    color: white;
-    border: 1px solid #5d4b20;
-    border-radius: 7px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.dias-calendario button:hover {
-    background: #c9a227;
-    color: #111;
-}
-
-.dias-calendario button.hoje {
     border: 2px solid #FFD700;
-    color: #FFD700;
-}
-
-.dias-calendario button.vazio {
-    visibility: hidden;
-    cursor: default;
-}
-
-.data-selecionada {
+    padding: 10px;
+    margin: 4px 0 8px 0;
     text-align: center;
-    color: #aaa;
-    font-size: 13px;
-    margin-top: 15px;
-    min-height: 18px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
 }
 
-.fechar-calendario {
-    display: block;
-    margin: 16px auto 0 auto;
-    padding: 9px 20px;
-    background: #8f0000;
+.historico-subtitulo {
     color: white;
-    border: none;
-    border-radius: 7px;
-    cursor: pointer;
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 4px 0 10px 0;
+}
+
+.historico-tabela-wrap {
+    overflow-x: auto;
+    margin-bottom: 16px;
+}
+
+.historico-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+}
+
+.historico-tabela th {
+    background: #fffda0;
+    color: #111;
+    border: 1px solid #fff;
+    padding: 6px 4px;
     font-weight: bold;
 }
 
-.fechar-calendario:hover {
-    background: #b00000;
+.historico-tabela td {
+    background: rgba(255, 253, 160, 0.95);
+    color: #111;
+    border: 1px solid white;
+    padding: 6px 4px;
 }
 
-/* Ajuste para celular */
-@media(max-width: 768px) {
+.historico-fechar {
+    display: block !important;
+    width: 100%;
+    margin-top: 8px;
+}
 
-    .calendario-outros {
-        width: 94%;
-        padding: 16px;
+@media(max-width: 768px) {
+    .historico-tabela {
+        font-size: 13px;
     }
 
-    .dias-calendario button {
-        min-height: 42px;
+    .historico-tabela th,
+    .historico-tabela td {
+        padding: 8px 4px;
+        white-space: nowrap;
+    }
+
+    .historico-titulo {
+        font-size: 17px;
     }
 }
 
 </style>
 </head>
-<!-- =======================================================
-     OUTROS RESULTADOS — CALENDÁRIO
-     ======================================================= -->
-
-<div id="modalOutros" class="modal-outros">
-
-    <div class="calendario-outros">
-
-        <div class="titulo-calendario">
-            OUTROS RESULTADOS
-        </div>
-
-        <div class="navegacao-calendario">
-
-            <button onclick="mudarMes(-1)">◀</button>
-
-            <div id="mesAno"></div>
-
-            <button onclick="mudarMes(1)">▶</button>
-
-        </div>
-
-        <div class="dias-semana">
-
-            <div>DOM</div>
-            <div>SEG</div>
-            <div>TER</div>
-            <div>QUA</div>
-            <div>QUI</div>
-            <div>SEX</div>
-            <div>SÁB</div>
-
-        </div>
-
-        <div id="diasCalendario" class="dias-calendario"></div>
-
-        <div id="dataSelecionada" class="data-selecionada">
-            Selecione um dia
-        </div>
-
-        <button class="fechar-calendario"
-                onclick="fecharOutrosResultados()">
-            CANCELAR
-        </button>
-
-    </div>
-
-</div>
 <body>
 
 <div class="container">
@@ -414,7 +298,6 @@ body {
 
     <div class="area-click" onclick="toggleResultados()"></div>
     <div class="area-palpite" onclick="abrirPalpites()"></div>
-    <div class="area-sonhos" onclick="abrirSonhosPalpites()"></div>
     <div class="area-outros" onclick="abrirOutrosResultados()"></div>
 
     <div id="tabela" class="tabela-box">
@@ -469,14 +352,6 @@ function getEmoji(bicho) {
 function abrirPalpites() {
     window.open("https://www.youtube.com/channel/UCekfnO-XM6IAepw7gzwukWA", "_blank");
 }
-function abrirSonhosPalpites() {
-
-    window.open(
-        "https://estreladasorte.site/auto-cadastro?ref1=MzAy&ref2=MzE=",
-        "_blank"
-    );
-
-}
 
 function fecharTabela() {
     document.getElementById("tabela").style.display = "none";
@@ -488,11 +363,13 @@ function toggleResultados() {
 
     if (box.style.display === "flex") {
 
+        box.classList.remove("historico");
         box.style.display = "none";
         box.style.visibility = "hidden";
 
     } else {
 
+        box.classList.remove("historico");
         box.style.display = "flex";
         box.style.visibility = "visible";
 
@@ -712,374 +589,111 @@ console.log("Última data encontrada:", ultimaData);
 
 }
 /* =======================================================
-   OUTROS RESULTADOS — CALENDÁRIO
-   FASE 1: apenas seleção da data
+   OUTROS RESULTADOS — TRILHA 2
+   Consulta automática do Poste de Ontem.
+   Não utiliza nem altera resultados.csv.
    ======================================================= */
-
-let calendarioDataAtual = new Date();
-let dataConsultaSelecionada = "";
 
 function abrirOutrosResultados() {
 
-    calendarioDataAtual = new Date();
+    var box = document.getElementById("tabela");
+    var lista = document.getElementById("lista-resultados");
 
-    document.getElementById("modalOutros").style.display = "flex";
-
-    renderizarCalendario();
-}
-
-
-function fecharOutrosResultados() {
-
-    document.getElementById("modalOutros").style.display = "none";
-
-    dataConsultaSelecionada = "";
-}
-
-
-function mudarMes(direcao) {
-
-    calendarioDataAtual.setMonth(
-        calendarioDataAtual.getMonth() + direcao
-    );
-
-    dataConsultaSelecionada = "";
-
-    renderizarCalendario();
-}
-
-
-function renderizarCalendario() {
-
-    const nomesMeses = [
-        "JANEIRO",
-        "FEVEREIRO",
-        "MARÇO",
-        "ABRIL",
-        "MAIO",
-        "JUNHO",
-        "JULHO",
-        "AGOSTO",
-        "SETEMBRO",
-        "OUTUBRO",
-        "NOVEMBRO",
-        "DEZEMBRO"
-    ];
-
-    const mes = calendarioDataAtual.getMonth();
-    const ano = calendarioDataAtual.getFullYear();
-
-    document.getElementById("mesAno").textContent =
-        nomesMeses[mes] + " " + ano;
-
-
-    const diasCalendario =
-        document.getElementById("diasCalendario");
-
-    diasCalendario.innerHTML = "";
-
-
-    /*
-       Primeiro dia do mês.
-       0 = domingo
-       1 = segunda
-       ...
-       6 = sábado
-    */
-
-    const primeiroDia =
-        new Date(ano, mes, 1).getDay();
-
-
-    /*
-       Último dia do mês.
-    */
-
-    const ultimoDia =
-        new Date(ano, mes + 1, 0).getDate();
-
-
-    /*
-       Espaços antes do primeiro dia.
-    */
-
-    for (let i = 0; i < primeiroDia; i++) {
-
-        const vazio = document.createElement("button");
-
-        vazio.type = "button";
-        vazio.className = "vazio";
-        vazio.disabled = true;
-
-        diasCalendario.appendChild(vazio);
-    }
-
-
-    /*
-       Cria os dias do mês.
-    */
-
-    const hoje = new Date();
-
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-
-        const botao = document.createElement("button");
-
-        botao.type = "button";
-        botao.textContent = dia;
-
-
-        /*
-           Destaca o dia atual.
-        */
-
-        if (
-            dia === hoje.getDate() &&
-            mes === hoje.getMonth() &&
-            ano === hoje.getFullYear()
-        ) {
-
-            botao.classList.add("hoje");
-        }
-
-
-        /*
-           Quando o usuário clicar no dia.
-        */
-
-        botao.onclick = function() {
-
-            selecionarDiaCalendario(
-                dia,
-                mes,
-                ano
-            );
-
-        };
-
-
-        diasCalendario.appendChild(botao);
-    }
-
-
-    document.getElementById("dataSelecionada").textContent =
-        dataConsultaSelecionada
-            ? "Data selecionada: " + dataConsultaSelecionada
-            : "Selecione um dia";
-}
-
-
-function selecionarDiaCalendario(dia, mes, ano) {
-
-    const diaFormatado =
-        String(dia).padStart(2, "0");
-
-    const mesFormatado =
-        String(mes + 1).padStart(2, "0");
-
-    dataConsultaSelecionada =
-        diaFormatado +
-        "/" +
-        mesFormatado +
-        "/" +
-        ano;
-
-    const mensagem =
-        document.getElementById("dataSelecionada");
-
-    mensagem.textContent =
-        "Consultando resultados de " +
-        dataConsultaSelecionada +
-        "...";
-
-    console.log(
-        "Consultando:",
-        dataConsultaSelecionada
-    );
-
-    const url =
-        "http://127.0.0.1:8000/consultar?data=" +
-        encodeURIComponent(dataConsultaSelecionada);
-
-    fetch(url)
-
-        .then(function(resposta) {
-
-            if (!resposta.ok) {
-
-                throw new Error(
-                    "Erro HTTP: " + resposta.status
-                );
-
-            }
-
-            return resposta.json();
-
-        })
-
-        .then(function(dados) {
-
-            console.log(
-                "Resposta recebida:",
-                dados
-            );
-
-            if (!dados.sucesso) {
-
-                mensagem.textContent =
-                    dados.mensagem ||
-                    "Resultado inexistente.";
-
-                return;
-            }
-
-            mostrarResultadosHistoricos(dados);
-
-        })
-
-        .catch(function(erro) {
-
-            console.error(
-                "Erro na consulta:",
-                erro
-            );
-
-            mensagem.textContent =
-                "Não foi possível consultar os resultados.";
-
-        });
-
-}
-
-
-/* =======================================================
-   OUTROS RESULTADOS — EXIBIÇÃO DOS RESULTADOS
-   ======================================================= */
-
-function mostrarResultadosHistoricos(dados) {
-
-    var lista =
-        document.getElementById("lista-resultados");
-
-    if (!dados.resultados ||
-        dados.resultados.length === 0) {
-
-        lista.innerHTML =
-            '<div class="msg-status">' +
-            'Resultado inexistente para ' +
-            dados.data +
-            '.</div>';
-
-        return;
-    }
-
-    var html = "";
-
-    /* Cabeçalho da data */
-
-    html +=
-        '<div class="titulo-data">' +
-        '📅 RESULTADOS DO DIA ' +
-        dados.data +
-        '</div>';
-
-
-    /* Cria as linhas dos resultados */
-
-    for (
-        var i = 0;
-        i < dados.resultados.length;
-        i++
-    ) {
-
-        var r = dados.resultados[i];
-
-        var banca =
-            r.Banca || "";
-
-        var hora =
-            r.Horario || "";
-
-        var premio =
-            r.Premio || "";
-
-        var milhar =
-            r.Milhar || "";
-
-        var centena =
-            r.Centena || "";
-
-        var grupo =
-            String(r.Grupo || "")
-            .padStart(2, "0");
-
-        var bicho =
-            r.Bicho || "";
-
-        var emoji =
-            getEmoji(bicho);
-
-
-        html +=
-            '<div class="linha">' +
-
-                '<div>' +
-                    banca +
-                '</div>' +
-
-                '<div>' +
-                    hora +
-                '</div>' +
-
-                '<div>' +
-                    premio +
-                '</div>' +
-
-                '<div>' +
-                    milhar +
-                '</div>' +
-
-                '<div>' +
-                    centena +
-                '</div>' +
-
-                '<div class="grupo-col">' +
-                    grupo +
-                '</div>' +
-
-                '<div class="bicho-col">' +
-                    emoji +
-                    ' ' +
-                    bicho +
-                '</div>' +
-
-            '</div>';
-    }
-
-
-    /* Coloca os resultados na mesma área */
-
-    lista.innerHTML = html;
-
-
-    /* Fecha o calendário */
-
-    fecharOutrosResultados();
-
-
-    /* Abre a caixa de resultados */
-
-    var box =
-        document.getElementById("tabela");
-
+    box.classList.add("historico");
     box.style.display = "flex";
     box.style.visibility = "visible";
 
+    lista.innerHTML =
+        '<div class="msg-status">Carregando outros resultados...</div>';
 
-    /* Volta para o início da tabela */
+    fetch("/outros-resultados?t=" + Date.now(), {
+        cache: "no-store"
+    })
+    .then(function(resposta) {
 
-    box.scrollTop = 0;
+        if (!resposta.ok) {
+            throw new Error("Erro HTTP: " + resposta.status);
+        }
+
+        return resposta.json();
+    })
+    .then(function(dados) {
+
+        if (!dados.sucesso || !dados.tabelas || dados.tabelas.length === 0) {
+            lista.innerHTML =
+                '<div class="msg-status msg-erro">' +
+                (dados.mensagem || "Nenhum resultado encontrado.") +
+                '</div>';
+            return;
+        }
+
+        var html = "";
+
+        for (var i = 0; i < dados.tabelas.length; i++) {
+
+            var tabela = dados.tabelas[i];
+
+            var tituloExibido = tabela.titulo || "";
+            var subtituloExibido = tabela.subtitulo || "";
+
+            html += '<div class="historico-titulo">' +
+                tituloExibido +
+                '</div>';
+
+            if (subtituloExibido && subtituloExibido !== tituloExibido) {
+                html += '<div class="historico-subtitulo">' +
+                    subtituloExibido +
+                    '</div>';
+            }
+
+            html += '<div class="historico-tabela-wrap">';
+            html += '<table class="historico-tabela">';
+            html += '<thead><tr>';
+
+            for (var h = 0; h < tabela.cabecalho.length; h++) {
+                html += '<th>' + tabela.cabecalho[h] + '</th>';
+            }
+
+            html += '</tr></thead><tbody>';
+
+            for (var r = 0; r < tabela.linhas.length; r++) {
+                html += '<tr>';
+
+                for (var c = 0; c < tabela.linhas[r].length; c++) {
+                    html += '<td>' + tabela.linhas[r][c] + '</td>';
+                }
+
+                html += '</tr>';
+            }
+
+            html += '</tbody></table></div>';
+        }
+
+        html += '<button class="btn-fechar historico-fechar" onclick="fecharOutrosResultados()">✖ Fechar</button>';
+
+        lista.innerHTML = html;
+    })
+    .catch(function(erro) {
+
+        console.error("Erro na Trilha 2:", erro);
+
+        lista.innerHTML =
+            '<div class="msg-status msg-erro">Erro ao consultar os outros resultados.</div>';
+    });
 }
+
+function fecharOutrosResultados() {
+
+    var box = document.getElementById("tabela");
+    var lista = document.getElementById("lista-resultados");
+
+    box.classList.remove("historico");
+    box.style.display = "none";
+    box.style.visibility = "hidden";
+
+    lista.innerHTML = '<div class="msg-status">Carregando...</div>';
+}
+
 </script>
 
 </body>
