@@ -194,7 +194,7 @@ def carregar_chaves_existentes():
             chave = (
                 row.get("Data", ""),
                 row.get("Banca", ""),
-                row.get("Horario", ""),
+                row.get("Horario", row.get("Hora", "")),
                 row.get("Premio", ""),
                 row.get("Milhar", "")
             )
