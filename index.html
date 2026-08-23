@@ -524,6 +524,22 @@ body {
 
     <div class="area-sonhos" onclick="abrirSonhos()"></div>
 
+    <div id="modalOutros" class="modal">
+        <div class="modal-box">
+            <h2>Outros Resultados</h2>
+            <input
+                id="dataConsulta"
+                type="text"
+                inputmode="numeric"
+                maxlength="10"
+                placeholder="DD/MM/AAAA"
+                autocomplete="off"
+            >
+            <button class="btnConsultar" onclick="consultarOutrosResultados()">Consultar</button>
+            <button class="btnCancelar" onclick="fecharModalOutros()">Cancelar</button>
+        </div>
+    </div>
+
     <div id="tabela" class="tabela-box">
 
         <div class="botoes-filtro">
@@ -822,28 +838,29 @@ function carregarResultadosHoje(filtro) {
     lista.innerHTML =
         '<div class="msg-status">Atualizando resultados...</div>';
 
-    fetch("http://127.0.0.1:5000/atualizar?t=" + Date.now(), {
+    fetch("/atualizar?t=" + Date.now(), {
         cache: "no-store"
     })
     .then(function(resposta) {
 
-        if (!resposta.ok)
+        if (!resposta.ok) {
             throw new Error(
                 "Erro ao atualizar resultados: HTTP " +
                 resposta.status
             );
+        }
 
         return resposta.text();
 
     })
     .then(function() {
 
-        return fetch(
-            "resultados.csv?t=" + Date.now(),
-            {
-                cache: "no-store"
-            }
-        );
+        lista.innerHTML =
+            '<div class="msg-status">Lendo resultados atualizados...</div>';
+
+        return fetch("resultados.csv?t=" + Date.now(), {
+            cache: "no-store"
+        });
 
     })
     .then(function(resposta) {
@@ -992,221 +1009,177 @@ function carregarResultadosHoje(filtro) {
 
         lista.innerHTML =
             '<div class="msg-status msg-erro">' +
-            'Erro ao atualizar os resultados.' +
+            'Erro ao atualizar os resultados.<br><br>' +
+            '<small>' + (e && e.message ? e.message : e) + '</small>' +
             '</div>';
 
     });
 
 }
+function substituirNomeFeraDaSorte(texto) {
+    return String(texto || "").replace(/Deu\\s+no\\s+Poste/gi, "Fera da Sorte");
+}
+
 function abrirOutrosResultados() {
 
-    var box =
-        document.getElementById("tabela");
+    var modal = document.getElementById("modalOutros");
+    var campo = document.getElementById("dataConsulta");
 
-    var lista =
-        document.getElementById("lista-resultados");
+    modal.style.display = "flex";
+    campo.value = "";
+    campo.focus();
+}
 
-    box.classList.add("historico");
+function fecharModalOutros() {
 
-    box.style.display = "flex";
+    document.getElementById("modalOutros").style.display = "none";
+}
 
-    box.style.visibility = "visible";
+function consultarOutrosResultados() {
+
+    var campo = document.getElementById("dataConsulta");
+
+    if (!campo) {
+        console.error("Campo de data da Trilha 2 não encontrado.");
+        return;
+    }
+
+    var data = campo.value.trim();
+
+    if (!data) {
+        alert("Informe uma data no formato DD/MM/AAAA.");
+        return;
+    }
+
+    var partes = data.split("/");
+
+    if (
+        partes.length !== 3 ||
+        partes[0].length !== 2 ||
+        partes[1].length !== 2 ||
+        partes[2].length !== 4
+    ) {
+        alert("Informe a data no formato DD/MM/AAAA.");
+        return;
+    }
+
+    var lista = document.getElementById("lista-resultados");
 
     lista.innerHTML =
-        '<div class="msg-status">' +
-        'Carregando outros resultados...' +
-        '</div>';
+        '<div class="msg-status">Consultando resultados de ' +
+        data +
+        '...</div>';
 
-    fetch("http://127.0.0.1:5000/outros-resultados?t=" + Date.now(), {
+    var url =
+        "http://127.0.0.1:8001/consultar?data=" +
+        encodeURIComponent(data) +
+        "&t=" +
+        Date.now();
+
+    console.log("Consultando Trilha 2:", url);
+
+    fetch(url, {
         cache: "no-store"
     })
     .then(function(resposta) {
 
         if (!resposta.ok) {
-
             throw new Error(
-                "Erro HTTP: " +
-                resposta.status
+                "Erro HTTP: " + resposta.status
             );
-
         }
 
         return resposta.json();
-
     })
     .then(function(dados) {
 
+        console.log("Resposta da Trilha 2:", dados);
+
         if (
+            !dados ||
             !dados.sucesso ||
-            !dados.tabelas ||
-            dados.tabelas.length === 0
+            !Array.isArray(dados.resultados) ||
+            dados.resultados.length === 0
         ) {
 
             lista.innerHTML =
                 '<div class="msg-status msg-erro">' +
-                (dados.mensagem ||
-                "Nenhum resultado encontrado.") +
-                '</div>';
+                'Nenhum resultado encontrado para ' +
+                data +
+                '.</div>';
 
             return;
         }
 
-        var html = "";
+        fecharModalOutros();
 
-        /*
-         * O título principal é exibido somente uma vez.
-         * O nome apresentado ao usuário será
-         * "Fera da Sorte de Ontem".
-         */
-
-        var tituloPrincipal = "";
-
-        for (
-            var i = 0;
-            i < dados.tabelas.length;
-            i++
-        ) {
-
-            var tabela =
-                dados.tabelas[i];
-
-            var tituloExibido =
-                tabela.titulo || "";
-
-            var subtituloExibido =
-                tabela.subtitulo || "";
-
-            /*
-             * Exibe o título principal apenas na
-             * primeira tabela encontrada.
-             */
-
-            if (
-                !tituloPrincipal &&
-                tituloExibido
-            ) {
-
-                tituloPrincipal =
-                    tituloExibido.replace(
-                        /Deu no Poste de Ontem/gi,
-                        "Fera da Sorte de Ontem"
-                    );
-
-                html +=
-                    '<div class="historico-titulo">' +
-                    tituloPrincipal +
-                    '</div>';
-            }
-
-            /*
-             * Mantém o subtítulo/data da tabela,
-             * quando existir.
-             */
-
-            if (
-                subtituloExibido &&
-                subtituloExibido !== tituloExibido
-            ) {
-
-                html +=
-                    '<div class="historico-subtitulo">' +
-                    subtituloExibido +
-                    '</div>';
-            }
-
-            html +=
-                '<div class="historico-tabela-wrap">';
-
-            html +=
-                '<table class="historico-tabela">';
-
-            html +=
-                '<thead><tr>';
-
-            /*
-             * Cabeçalho da tabela.
-             */
-
-            for (
-                var h = 0;
-                h < tabela.cabecalho.length;
-                h++
-            ) {
-
-                html +=
-                    '<th>' +
-                    tabela.cabecalho[h] +
-                    '</th>';
-
-            }
-
-            html +=
-                '</tr></thead><tbody>';
-
-            /*
-             * Linhas da tabela.
-             */
-
-            for (
-                var r = 0;
-                r < tabela.linhas.length;
-                r++
-            ) {
-
-                html += '<tr>';
-
-                for (
-                    var c = 0;
-                    c < tabela.linhas[r].length;
-                    c++
-                ) {
-
-                    html +=
-                        '<td>' +
-                        tabela.linhas[r][c] +
-                        '</td>';
-
-                }
-
-                html += '</tr>';
-
-            }
-
-            html +=
-                '</tbody></table></div>';
-
-        }
-
-        /*
-         * Botão para fechar a consulta temporária.
-         */
+        var html =
+            '<div class="historico-titulo">' +
+            'FERA DA SORTE — ' + data +
+            '</div>';
 
         html +=
-            '<button ' +
-            'class="btn-fechar historico-fechar" ' +
+            '<div class="historico-tabela-wrap">' +
+            '<table class="historico-tabela">' +
+            '<thead><tr>' +
+            '<th>Banca</th>' +
+            '<th>Horário</th>' +
+            '<th>Prêmio</th>' +
+            '<th>Milhar</th>' +
+            '<th>Centena</th>' +
+            '<th>Grupo</th>' +
+            '<th>Bicho</th>' +
+            '</tr></thead><tbody>';
+
+        for (var i = 0; i < dados.resultados.length; i++) {
+
+            var r = dados.resultados[i];
+
+            html +=
+                '<tr>' +
+                '<td>' + (r.Banca || "") + '</td>' +
+                '<td>' + (r.Horario || "") + '</td>' +
+                '<td>' + (r.Premio || "") + '</td>' +
+                '<td>' + (r.Milhar || "") + '</td>' +
+                '<td>' + (r.Centena || "") + '</td>' +
+                '<td>' + (r.Grupo || "") + '</td>' +
+                '<td>' +
+                getEmoji(r.Bicho) +
+                ' ' +
+                (r.Bicho || "") +
+                '</td>' +
+                '</tr>';
+        }
+
+        html +=
+            '</tbody></table>' +
+            '</div>' +
+            '<button class="btn-fechar historico-fechar" ' +
             'onclick="fecharOutrosResultados()">' +
             '✖ Fechar' +
             '</button>';
 
         lista.innerHTML = html;
 
+        var box = document.getElementById("tabela");
+
+        box.classList.add("historico");
+        box.style.display = "flex";
+        box.style.visibility = "visible";
     })
     .catch(function(erro) {
 
-        console.error(
-            "Erro na Trilha 2:",
-            erro
-        );
+        console.error("Erro na Trilha 2:", erro);
 
         lista.innerHTML =
             '<div class="msg-status msg-erro">' +
-            'Erro ao consultar os outros resultados.' +
+            'Erro ao consultar os outros resultados.<br><br>' +
+            '<small>' +
+            (erro && erro.message ? erro.message : erro) +
+            '</small>' +
             '</div>';
-
     });
-
 }
-
 
 function fecharOutrosResultados() {
 

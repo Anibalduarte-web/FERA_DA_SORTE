@@ -324,15 +324,10 @@ def arquivos(arquivo):
 
 
 if __name__ == "__main__":
-    def abrir_fera_da_sorte():
-        webbrowser.open("http://127.0.0.1:5000/")
-
-    threading.Timer(1.0, abrir_fera_da_sorte).start()
-
     print("\n==============================")
     print("FERA DA SORTE")
     print("Servidor Flask iniciado.")
     print("Interface: http://127.0.0.1:5000/")
     print("==============================\n")
 
-    app.run(host="127.0.0.1", port=5000)
+    app.run(host="0.0.0.0", port=5000)

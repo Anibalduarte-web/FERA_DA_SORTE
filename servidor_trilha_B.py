@@ -2,11 +2,11 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
 
-from consulta_outros_resultados import consultar_data
+from consulta_outros_resultados_B import consultar_data
 
 
 HOST = "127.0.0.1"
-PORTA = 8000
+PORTA = 8001
 
 
 class ServidorConsulta(BaseHTTPRequestHandler):
