@@ -1,3 +1,4 @@
+C:\Users\Usuario>curl http://127.0.0.1:5000/
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -340,18 +341,18 @@ body {
    ========================================================= */
 
 @media(max-width: 768px) {
-    
+
     body {
         align-items: flex-start;
         padding: 0;
         margin: 0;
     }
-    
+
     .container {
         width: 100%;
         min-height: 100vh;
     }
-    
+
     .btn-fechar{
         display:none !important;
     }
@@ -395,10 +396,10 @@ body {
     }
 
     /* Exibir botão especial do João no mobile */
-    .btn-palpite-cel { 
-        display: inline-block !important; 
+    .btn-palpite-cel {
+        display: inline-block !important;
         background: #b91c1c !important;
-        color: white !important; 
+        color: white !important;
         border-color: #ef4444 !important;
         flex: 1 1 100% !important;
     }
@@ -418,7 +419,7 @@ body {
     .bicho-col {
         font-size: 15px;
     }
-    
+
     .grid-resultados::-webkit-scrollbar {
         width: 0px;
     }
@@ -532,7 +533,7 @@ body {
                 type="text"
                 inputmode="numeric"
                 maxlength="10"
-                placeholder="DD/MM/AAAA"
+                placeholder="DD-MM-AAAA"
                 autocomplete="off"
             >
             <button class="btnConsultar" onclick="consultarOutrosResultados()">Consultar</button>
@@ -1047,11 +1048,11 @@ function consultarOutrosResultados() {
     var data = campo.value.trim();
 
     if (!data) {
-        alert("Informe uma data no formato DD/MM/AAAA.");
+        alert("Informe uma data no formato DD-MM-AAAA.");
         return;
     }
 
-    var partes = data.split("/");
+    var partes = data.split("-");
 
     if (
         partes.length !== 3 ||
@@ -1059,9 +1060,10 @@ function consultarOutrosResultados() {
         partes[1].length !== 2 ||
         partes[2].length !== 4
     ) {
-        alert("Informe a data no formato DD/MM/AAAA.");
+        alert("Informe a data no formato DD-MM-AAAA.");
         return;
     }
+    var data = partes[0] + "/" + partes[1] + "/" + partes[2];
 
     var lista = document.getElementById("lista-resultados");
 
@@ -1071,7 +1073,7 @@ function consultarOutrosResultados() {
         '...</div>';
 
     var url =
-        "http://127.0.0.1:8001/consultar?data=" +
+        "/consultar?data=" +
         encodeURIComponent(data) +
         "&t=" +
         Date.now();
@@ -1211,3 +1213,5 @@ function fecharOutrosResultados() {
 
 </body>
 </html>
+C:\Users\Usuario>
+

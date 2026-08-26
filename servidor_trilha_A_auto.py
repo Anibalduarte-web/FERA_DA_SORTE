@@ -1,6 +1,7 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, request
 import subprocess
 import sys
+import time
 import os
 import re
 import threading
@@ -30,6 +31,44 @@ HEADERS = {
 }
 
 
+def iniciar_trilha_b():
+    """Inicia a Trilha B se ela ainda não estiver respondendo na porta 8001."""
+    try:
+        requests.get("http://127.0.0.1:8001/", timeout=2)
+        print("Trilha B já está em execução.")
+        return
+    except requests.RequestException:
+        pass
+
+    caminho_b = os.path.join(os.getcwd(), "servidor_trilha_B.py")
+
+    if not os.path.exists(caminho_b):
+        print("ERRO: servidor_trilha_B.py não encontrado.")
+        return
+
+    print("Iniciando Trilha B na porta 8001...")
+
+    subprocess.Popen(
+        [sys.executable, caminho_b],
+        cwd=os.getcwd(),
+        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+    )
+
+    for _ in range(10):
+        try:
+            resposta = requests.get(
+                "http://127.0.0.1:8001/",
+                timeout=1
+            )
+            if resposta.ok:
+                print("Trilha B iniciada com sucesso.")
+                return
+        except requests.RequestException:
+            time.sleep(0.5)
+
+    print("AVISO: a Trilha B foi iniciada, mas ainda não respondeu.")
+
+
 @app.route("/")
 def index():
     return send_from_directory(".", "index.html")
@@ -49,6 +88,42 @@ def resultados_csv():
     resposta.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     resposta.headers["Pragma"] = "no-cache"
     return resposta
+
+
+@app.route("/consultar")
+def consultar_trilha_b():
+    data = request.args.get("data", "").strip()
+
+    if not data:
+        return jsonify({
+            "sucesso": False,
+            "mensagem": "Data não informada."
+        }), 400
+
+    try:
+        resposta = requests.get(
+            "http://127.0.0.1:8001/consultar",
+            params={"data": data},
+            timeout=60
+        )
+
+        try:
+            dados = resposta.json()
+        except ValueError:
+            return jsonify({
+                "sucesso": False,
+                "mensagem": "A Trilha B não retornou uma resposta JSON válida."
+            }), 502
+
+        return jsonify(dados), resposta.status_code
+
+    except requests.RequestException as erro:
+        print("Erro ao acessar a Trilha B:", erro)
+        return jsonify({
+            "sucesso": False,
+            "mensagem": "Não foi possível acessar a Trilha B.",
+            "erro": str(erro)
+        }), 502
 
 
 @app.route("/atualizar")
@@ -330,4 +405,5 @@ if __name__ == "__main__":
     print("Interface: http://127.0.0.1:5000/")
     print("==============================\n")
 
+    iniciar_trilha_b()
     app.run(host="0.0.0.0", port=5000)
