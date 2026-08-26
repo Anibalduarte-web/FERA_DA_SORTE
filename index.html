@@ -708,124 +708,12 @@ function carregarResultados(filtro) {
 
     filtro = filtro || "";
 
-    var lista = document.getElementById("lista-resultados");
+    carregarResultadosHoje(filtro);
 
-    lista.innerHTML =
-        '<div class="msg-status">Carregando...</div>';
-
-    fetch("resultados.csv?t=" + Date.now(), {
-        cache: "no-store"
-    })
-    .then(function(r){
-
-        console.log("CSV veio de:", r.url);
-
-        if(!r.ok)
-            throw new Error("HTTP " + r.status);
-
-        return r.text();
-
-    })
-    .then(function(texto) {
-
-        var linhas = texto.trim().split("\n");
-
-        console.log("Linhas do CSV:", linhas.length);
-
-        if (linhas.length <= 1) {
-
-            lista.innerHTML =
-                '<div class="msg-status">Arquivo CSV vazio.</div>';
-
-            return;
-        }
-
-        var html = "";
-
-        var total = 0;
-
-        var dataAnterior = "";
-
-        for (var i = 1; i < linhas.length; i++) {
-
-            var l = linhas[i].trim();
-
-            if (!l)
-                continue;
-
-            var c = l.split(";");
-
-            var data = (c[0] || "").trim();
-
-            console.log(data);
-
-            if (c.length < 8)
-                continue;
-
-            var banca   = (c[1] || "").trim();
-            var hora    = (c[2] || "").trim();
-            var premio  = (c[3] || "").trim();
-            var milhar  = (c[4] || "").trim();
-            var centena = (c[5] || "").trim();
-            var grupo   = (c[6] || "").trim().padStart(2, "0");
-            var bicho   = (c[7] || "").trim();
-
-            var emoji = getEmoji(bicho);
-
-            if (filtro && hora !== filtro)
-                continue;
-
-            total++;
-
-            if (data !== dataAnterior) {
-
-                html +=
-                    '<div class="titulo-data">' +
-                    '📅 RESULTADOS DO DIA ' +
-                    data +
-                    '</div>';
-
-                dataAnterior = data;
-            }
-
-            html +=
-                '<div class="linha">' +
-                    '<div>' + banca   + '</div>' +
-                    '<div>' + hora    + '</div>' +
-                    '<div>' + premio  + '</div>' +
-                    '<div>' + milhar  + '</div>' +
-                    '<div>' + centena + '</div>' +
-                    '<div class="grupo-col">' + grupo + '</div>' +
-                    '<div class="bicho-col">' +
-                        emoji + ' ' + bicho +
-                    '</div>' +
-                '</div>';
-        }
-
-        lista.innerHTML = total > 0
-            ? html
-            : '<div class="msg-status">Sem resultados para ' +
-              (filtro || "mostrar") +
-              '.</div>';
-
-    })
-    .catch(function(e) {
-
-        lista.innerHTML =
-            '<div class="msg-status msg-erro">' +
-            '⚠ Erro ao ler resultados.csv<br>' +
-            '<small>Certifique-se de estar rodando pelo servidor local.</small>' +
-            '</div>';
-
-        console.error(e);
-
-    });
 }
-
 
 /* =======================================================
    RESULTADOS DE HOJE — TRILHA 1
-   Atualiza o CSV antes da leitura.
    ======================================================= */
 
 function carregarResultadosHoje(filtro) {
@@ -850,94 +738,33 @@ function carregarResultadosHoje(filtro) {
             );
         }
 
-        return resposta.text();
-
+        return resposta.json();
     })
-    .then(function() {
+    .then(function(dados) {
 
-        lista.innerHTML =
-            '<div class="msg-status">Lendo resultados atualizados...</div>';
+        console.log("Resultados recebidos:", dados);
 
-        return fetch("resultados.csv?t=" + Date.now(), {
-            cache: "no-store"
-        });
-
-    })
-    .then(function(resposta) {
-
-        if (!resposta.ok)
-            throw new Error(
-                "Erro ao ler CSV: HTTP " +
-                resposta.status
-            );
-
-        return resposta.text();
-
-    })
-    .then(function(texto) {
-
-        var linhas = texto.trim().split("\n");
-
-        if (linhas.length <= 1) {
-
+        if (
+            !dados ||
+            !dados.sucesso ||
+            !Array.isArray(dados.resultados) ||
+            dados.resultados.length === 0
+        ) {
             lista.innerHTML =
-                '<div class="msg-status">' +
-                'Arquivo CSV vazio.' +
+                '<div class="msg-status msg-erro">' +
+                'Nenhum resultado encontrado.' +
                 '</div>';
 
             return;
         }
 
-        /* Descobre corretamente a data mais recente */
-
-        var ultimaData = "";
-
-        var maiorData = null;
-
-        for (var i = 1; i < linhas.length; i++) {
-
-            var l = linhas[i].trim();
-
-            if (!l)
-                continue;
-
-            var c = l.split(";");
-
-            if (c.length < 8)
-                continue;
-
-            var d = c[0].trim();
-
-            var p = d.split("/");
-
-            if (p.length !== 3)
-                continue;
-
-            var dataObj = new Date(
-                parseInt(p[2]),
-                parseInt(p[1]) - 1,
-                parseInt(p[0])
-            );
-
-            if (
-                maiorData === null ||
-                dataObj > maiorData
-            ) {
-
-                maiorData = dataObj;
-
-                ultimaData = d;
-            }
-        }
-
-        console.log(
-            "Última data encontrada:",
-            ultimaData
-        );
+        var resultados = dados.resultados;
 
         var html = "";
 
         var total = 0;
+
+        var ultimaData = resultados[0].Data || "";
 
         html +=
             '<div class="titulo-data">' +
@@ -945,30 +772,22 @@ function carregarResultadosHoje(filtro) {
             ultimaData +
             '</div>';
 
-        for (var i = 1; i < linhas.length; i++) {
+        for (var i = 0; i < resultados.length; i++) {
 
-            var l = linhas[i].trim();
+            var r = resultados[i];
 
-            if (!l)
-                continue;
-
-            var c = l.split(";");
-
-            if (c.length < 8)
-                continue;
-
-            var data = c[0].trim();
+            var data = (r.Data || "").trim();
 
             if (data !== ultimaData)
                 continue;
 
-            var banca   = c[1].trim();
-            var hora    = c[2].trim();
-            var premio  = c[3].trim();
-            var milhar  = c[4].trim();
-            var centena = c[5].trim();
-            var grupo   = c[6].trim().padStart(2, "0");
-            var bicho   = c[7].trim();
+            var banca   = (r.Banca || "").trim();
+            var hora    = (r.Horario || "").trim();
+            var premio  = (r.Premio || "").trim();
+            var milhar  = (r.Milhar || "").trim();
+            var centena = (r.Centena || "").trim();
+            var grupo   = (r.Grupo || "").trim().padStart(2, "0");
+            var bicho   = (r.Bicho || "").trim();
 
             var emoji = getEmoji(bicho);
 
@@ -1010,7 +829,9 @@ function carregarResultadosHoje(filtro) {
         lista.innerHTML =
             '<div class="msg-status msg-erro">' +
             'Erro ao atualizar os resultados.<br><br>' +
-            '<small>' + (e && e.message ? e.message : e) + '</small>' +
+            '<small>' +
+            (e && e.message ? e.message : e) +
+            '</small>' +
             '</div>';
 
     });
@@ -1198,8 +1019,6 @@ function fecharOutrosResultados() {
 
     /*
      * Limpa a tabela temporária.
-     * Nenhum resultado da Trilha 2
-     * é salvo no resultados.csv.
      */
 
     lista.innerHTML =

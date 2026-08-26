@@ -1,7 +1,6 @@
 from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
-import csv
 import os
 import re
 import sys
@@ -15,7 +14,6 @@ URL_BASE = "https://www.ojogodobicho.com"
 URL_MAIN = URL_BASE + "/resultado/"
 
 PASTA_PROJETO = os.path.dirname(os.path.abspath(__file__))
-ARQUIVO_CSV = os.path.join(PASTA_PROJETO, "resultados.csv")
 ARQUIVO_HTML = os.path.join(PASTA_PROJETO, "resultado.html")
 
 HEADERS = {
@@ -26,16 +24,6 @@ HEADERS = {
     )
 }
 
-COLUNAS = [
-    "Data",
-    "Banca",
-    "Horario",
-    "Premio",
-    "Milhar",
-    "Centena",
-    "Grupo",
-    "Bicho"
-]
 
 # ==============================================================
 # FUNÇÕES ORIGINAIS
@@ -181,51 +169,6 @@ def extrair_resultados_dia(url_dia, data_str):
             })
 
     return resultados
-
-
-def carregar_chaves_existentes():
-    """Lê o CSV existente e retorna chaves para evitar duplicidade."""
-    chaves = set()
-    if not os.path.exists(ARQUIVO_CSV):
-        return chaves
-    with open(ARQUIVO_CSV, "r", encoding="utf-8-sig", newline="") as f:
-        reader = csv.DictReader(f, delimiter=";")
-        for row in reader:
-            chave = (
-                row.get("Data", ""),
-                row.get("Banca", ""),
-                row.get("Horario", row.get("Hora", "")),
-                row.get("Premio", ""),
-                row.get("Milhar", "")
-            )
-            chaves.add(chave)
-    return chaves
-
-
-def salvar_resultados(resultados):
-    """Salva resultados novos no CSV usando ponto e vírgula."""
-    try:
-        chaves = carregar_chaves_existentes()
-        arquivo_existe = os.path.exists(ARQUIVO_CSV)
-        novos = 0
-        with open(ARQUIVO_CSV, "a", encoding="utf-8-sig", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=COLUNAS, delimiter=";")
-            if not arquivo_existe:
-                writer.writeheader()
-            for r in resultados:
-                chave = (r["Data"], r["Banca"], r["Horario"],
-                         r["Premio"], r["Milhar"])
-                if chave not in chaves:
-                    writer.writerow(r)
-                    chaves.add(chave)
-                    novos += 1
-        return novos
-    except PermissionError:
-        print()
-        print("ERRO: O arquivo resultados.csv está aberto.")
-        print()
-        input("Pressione ENTER para sair...")
-        exit(1)
 
 # ==============================================================
 # NOVA FUNÇÃO — GERADOR DE HTML BONITO MODO APP
@@ -486,16 +429,8 @@ def main(data_str=None):
     if not resultados:
         print("    Nenhum resultado encontrado.")
         return
-
-    print("\n[3] Salvando no CSV...")
-    novos = salvar_resultados(resultados)
-    print(f"    Registros novos : {novos}")
-    print(f"    Arquivo         : {ARQUIVO_CSV}")
-    if novos == 0:
-        print("    Nenhum resultado novo foi encontrado.")
-
-    else:
-        print(f"    Foram adicionados {novos} registros ao CSV.")
+    print("\n[3] Resultados coletados para consulta.")
+    print(f"    Registros disponíveis: {len(resultados)}")
 
     print("\n[4] Gerando HTML bonito...")
     gerar_html_bonito(resultados, data_str)
@@ -518,6 +453,8 @@ def main(data_str=None):
     print("\n" + "=" * 55)
     print("  Concluído com sucesso!")
     print("=" * 55)
+
+    return resultados
 
 
 if __name__ == "__main__":

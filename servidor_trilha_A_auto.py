@@ -9,6 +9,7 @@ import webbrowser
 import html
 import requests
 from bs4 import BeautifulSoup
+import update_deu_no_poste
 
 app = Flask(__name__, static_folder=".")
 
@@ -74,22 +75,6 @@ def index():
     return send_from_directory(".", "index.html")
 
 
-@app.route("/resultados.csv")
-def resultados_csv():
-    caminho = os.path.join(os.getcwd(), "resultados.csv")
-    if not os.path.exists(caminho):
-        return "Arquivo resultados.csv não encontrado.", 404
-
-    resposta = send_from_directory(
-        os.getcwd(),
-        "resultados.csv",
-        mimetype="text/csv"
-    )
-    resposta.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-    resposta.headers["Pragma"] = "no-cache"
-    return resposta
-
-
 @app.route("/consultar")
 def consultar_trilha_b():
     data = request.args.get("data", "").strip()
@@ -134,20 +119,26 @@ def atualizar():
     print("==============================")
 
     try:
-        subprocess.run(
-            [sys.executable, "update_deu_no_poste.py"],
-            cwd=os.getcwd(),
-            check=True
-        )
+        resultados = update_deu_no_poste.main()
 
-        print("Atualização concluída.\n")
-        print("CSV atualizado em:")
-        print(os.path.abspath("resultados.csv"))
-        return "OK"
+        if not resultados:
+            return jsonify({
+                "sucesso": False,
+                "mensagem": "Nenhum resultado encontrado."
+            }), 404
+
+        return jsonify({
+            "sucesso": True,
+            "resultados": resultados
+        })
 
     except Exception as e:
-        print(e)
-        return str(e), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "sucesso": False,
+            "mensagem": str(e)
+        }), 500
 
 
 def texto_limpo(celula):
