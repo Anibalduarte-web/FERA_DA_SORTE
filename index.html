@@ -838,7 +838,7 @@ function carregarResultadosHoje(filtro) {
     lista.innerHTML =
         '<div class="msg-status">Atualizando resultados...</div>';
 
-    fetch("/atualizar?t=" + Date.now(), {
+    fetch("https://desktop-8ni4hc3.tail3b04cc.ts.net/atualizar?t=" + Date.now(), {
         cache: "no-store"
     })
     .then(function(resposta) {
@@ -1072,10 +1072,10 @@ function consultarOutrosResultados() {
         '...</div>';
 
     var url =
-        "/consultar?data=" +
-        encodeURIComponent(data) +
-        "&t=" +
-        Date.now();
+    "https://desktop-8ni4hc3.tail3b04cc.ts.net/consultar?data=" +
+    encodeURIComponent(data) +
+    "&t=" +
+    Date.now();
 
     console.log("Consultando Trilha 2:", url);
 
