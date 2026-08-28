@@ -508,13 +508,114 @@ body {
     }
 }
 
+
+/* =======================================================
+   GIRO DA SORTE — INTEGRAÇÃO
+   ======================================================= */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;background:#080706;font-family:Arial,sans-serif}
+body{display:flex;justify-content:center;align-items:flex-start}
+.giro-container{position:relative;width:100%;max-width:1536px;line-height:0}
+.giro-container img{width:100%;height:auto;display:block}
+
+.giro-campo{
+position:absolute;top:55.65%;left:3.15%;width:15.75%;height:4.85%;z-index:20;
+background:#080706;border:1.5px solid #c9a227;border-radius:7px;color:#e4b43c;
+text-align:center;font-size:clamp(14px,1.45vw,22px);font-weight:bold;line-height:normal;
+outline:none;cursor:pointer
+}
+.giro-campo:focus{border-color:#ffd34d;box-shadow:0 0 8px rgba(255,211,77,.55)}
+.giro-botao{
+position:absolute;top:61%;left:3.15%;width:15.75%;height:4.05%;z-index:20;
+border:1.5px solid #e5ad29;border-radius:7px;background:linear-gradient(#dca52d,#8b5c0d);
+color:#111;font-size:clamp(13px,1.35vw,21px);font-weight:bold;line-height:normal;
+cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.65)
+}
+.giro-botao:hover{filter:brightness(1.1)}
+.giro-botao:disabled{opacity:.55;cursor:not-allowed}
+
+.giro-resultado{
+position:absolute;
+top:70%;
+left:4.25%;
+width:14%;
+height:9.4%;
+z-index:20;
+background:#080706;
+border:1.5px solid #8e6b22;
+border-radius:6px;color:#e4b43c;
+display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+line-height:normal;pointer-events:none
+}
+.giro-resultado .numero{font-size:clamp(22px,2.6vw,40px);font-weight:bold}
+.giro-resultado .bicho{font-size:clamp(11px,1.05vw,17px);color:#fff;margin-top:1px}
+.giro-mensagem{
+position:absolute;
+top:81.0%;
+left:3.0%;
+width:16.2%;
+height:3.0%;
+z-index:21;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+color:transparent;
+font-size:clamp(11px,1.2vw,18px);
+font-weight:bold;
+line-height:normal;
+pointer-events:none
+}
+.giro-mensagem.vitoria{color:#42e642;text-shadow:0 0 7px rgba(50,255,50,.45)}
+.giro-mensagem.derrota{color:#ff6255;text-shadow:0 0 7px rgba(255,70,60,.35)}
+
+.moldura-roleta{
+position:absolute;
+z-index:15;
+pointer-events:none;
+top:30%;
+left:20%;
+width:10%;
+height:8.7%;
+border:3px solid #ffd34d;
+border-radius:7px;
+box-shadow:0 0 5px #ffd34d,0 0 13px #e5a91f,inset 0 0 10px rgba(255,211,77,.28);
+transition:top .04s linear,left .04s linear;opacity:0
+}
+.moldura-roleta.visivel{opacity:1}
+.moldura-roleta.parada{box-shadow:0 0 7px #ffd34d,0 0 20px #ffb51b,inset 0 0 13px rgba(255,211,77,.38)}
+
+.debug{border-color:red!important}
+
+@media(max-width:768px){
+.giro-container{width:100%}
+.giro-campo{font-size:13px}.giro-botao{font-size:12px}
+.giro-resultado .numero{font-size:25px}.giro-resultado .bicho{font-size:10px}
+.giro-mensagem{font-size:10px}.moldura-roleta{border-width:2px}
+}
 </style>
 </head>
 <body>
 
 <div class="container">
 
-    <img src="site-fera-da-sorte.png" alt="Fera da Sorte">
+    
+<img src="Giro_da_sorte.png" alt="Giro da Sorte">
+
+<select id="giroCampo" class="giro-campo">
+    <option value="">Número</option>
+</select>
+
+<button id="giroBotao" class="giro-botao" type="button">GIRAR</button>
+
+<div id="giroResultado" class="giro-resultado">
+    <div class="numero"></div>
+    <div class="bicho"></div>
+</div>
+
+<div id="giroMensagem" class="giro-mensagem"></div>
+<div id="molduraRoleta" class="moldura-roleta"></div>
+
 
     <div class="area-click" onclick="toggleResultados()"></div>
 
@@ -599,6 +700,187 @@ body {
     </div>
 
 </div>
+
+
+<script>
+/* =======================================================
+   GIRO DA SORTE — FUNCIONALIDADE
+   ======================================================= */
+"use strict";
+
+const bichos=[
+"AVESTRUZ","ÁGUIA","BURRO","BORBOLETA","CACHORRO",
+"CABRA","CARNEIRO","CAMELO","COBRA","COELHO",
+"CAVALO","ELEFANTE","GALO","GATO","JACARÉ",
+"LEÃO","MACACO","PORCO","PAVÃO","PERU",
+"TOURO","TIGRE","URSO","VEADO","VACA"
+];
+
+const campo=document.getElementById("giroCampo");
+const botao=document.getElementById("giroBotao");
+const resultado=document.getElementById("giroResultado");
+const mensagem=document.getElementById("giroMensagem");
+const moldura=document.getElementById("molduraRoleta");
+
+const casas=[
+{top:38.7,left:23.4},{top:38.7,left:33.5},{top:38.7,left:43.6},{top:38.7,left:53.7},{top:38.7,left:63.8},
+{top:47.5,left:23.4},{top:47.5,left:33.5},{top:47.5,left:43.6},{top:47.5,left:53.7},{top:47.5,left:63.8},
+{top:56.3,left:23.4},{top:56.3,left:33.5},{top:56.3,left:43.6},{top:56.3,left:53.7},{top:56.3,left:63.8},
+{top:65.1,left:23.4},{top:65.1,left:33.5},{top:65.1,left:43.6},{top:65.1,left:53.7},{top:65.1,left:63.8},
+{top:73.9,left:23.4},{top:73.9,left:33.5},{top:73.9,left:43.6},{top:73.9,left:53.7},{top:73.9,left:63.8}
+];
+
+for(let i=1;i<=25;i++){
+const option=document.createElement("option");
+option.value=i;
+option.textContent=String(i).padStart(2,"0");
+campo.appendChild(option);
+}
+
+let audioContext=null;
+
+function prepararAudio(){
+if(!audioContext) audioContext=new(window.AudioContext||window.webkitAudioContext)();
+if(audioContext.state==="suspended") audioContext.resume();
+}
+
+function somTec(){
+if(!audioContext)return;
+const agora=audioContext.currentTime;
+const oscillator=audioContext.createOscillator();
+const ganho=audioContext.createGain();
+oscillator.type="square";
+oscillator.frequency.setValueAtTime(1450,agora);
+oscillator.frequency.exponentialRampToValueAtTime(620,agora+.035);
+ganho.gain.setValueAtTime(.0001,agora);
+ganho.gain.exponentialRampToValueAtTime(.18,agora+.003);
+ganho.gain.exponentialRampToValueAtTime(.0001,agora+.045);
+oscillator.connect(ganho);ganho.connect(audioContext.destination);
+oscillator.start(agora);oscillator.stop(agora+.05);
+}
+
+function somVitoria(){
+if(!audioContext)return;
+const agora=audioContext.currentTime;
+[523.25,659.25,783.99,1046.5].forEach((frequencia,indice)=>{
+const oscillator=audioContext.createOscillator();
+const ganho=audioContext.createGain();
+const inicio=agora+indice*.13;
+oscillator.type="sine";oscillator.frequency.setValueAtTime(frequencia,inicio);
+ganho.gain.setValueAtTime(.0001,inicio);
+ganho.gain.exponentialRampToValueAtTime(.20,inicio+.02);
+ganho.gain.exponentialRampToValueAtTime(.0001,inicio+.28);
+oscillator.connect(ganho);ganho.connect(audioContext.destination);
+oscillator.start(inicio);oscillator.stop(inicio+.30);
+});
+}
+
+function somTenteNovamente(){
+if(!audioContext)return;
+const agora=audioContext.currentTime;
+[300,220].forEach((frequencia,indice)=>{
+const oscillator=audioContext.createOscillator();
+const ganho=audioContext.createGain();
+const inicio=agora+indice*.18;
+oscillator.type="sawtooth";oscillator.frequency.setValueAtTime(frequencia,inicio);
+ganho.gain.setValueAtTime(.0001,inicio);
+ganho.gain.exponentialRampToValueAtTime(.16,inicio+.02);
+ganho.gain.exponentialRampToValueAtTime(.0001,inicio+.20);
+oscillator.connect(ganho);ganho.connect(audioContext.destination);
+oscillator.start(inicio);oscillator.stop(inicio+.22);
+});
+}
+
+function esperar(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+
+function embaralhar(array){
+const copia=array.slice();
+for(let i=copia.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[copia[i],copia[j]]=[copia[j],copia[i]];
+}
+return copia;
+}
+
+function posicionarMoldura(indice){
+moldura.style.top=casas[indice].top+"%";
+moldura.style.left=casas[indice].left+"%";
+}
+
+function mostrarResultado(numero){
+resultado.querySelector(".numero").textContent=String(numero).padStart(2,"0");
+resultado.querySelector(".bicho").textContent=bichos[numero-1];
+}
+
+async function girar(){
+if(!campo.value){
+mensagem.className="giro-mensagem derrota";
+mensagem.textContent="ESCOLHA UM NÚMERO";
+return;
+}
+
+prepararAudio();
+botao.disabled=true;
+campo.disabled=true;
+mensagem.className="giro-mensagem";
+mensagem.textContent="";
+resultado.querySelector(".numero").textContent="";
+resultado.querySelector(".bicho").textContent="";
+moldura.classList.remove("parada");
+moldura.classList.add("visivel");
+
+const resultadoFinal=Math.floor(Math.random()*25)+1;
+let percurso=[];
+
+for(let rodada=0;rodada<5;rodada++){
+percurso=percurso.concat(embaralhar(Array.from({length:25},(_,i)=>i)));
+}
+
+const ultima=embaralhar(Array.from({length:25},(_,i)=>i));
+const posicaoFinal=ultima.indexOf(resultadoFinal-1);
+percurso=percurso.concat(ultima.slice(0,posicaoFinal+1));
+
+for(let i=0;i<percurso.length;i++){
+posicionarMoldura(percurso[i]);
+somTec();
+const progresso=i/percurso.length;
+const atraso=42+Math.pow(progresso,3.4)*245;
+await esperar(atraso);
+}
+
+posicionarMoldura(resultadoFinal - 1);
+moldura.classList.add("parada");
+
+/* O resultado visual é exatamente a casa onde a moldura parou. */
+mostrarResultado(resultadoFinal);
+
+const escolhido=Number(campo.value);
+
+if(escolhido===resultadoFinal){
+mensagem.className="giro-mensagem vitoria";
+mensagem.textContent="VOCÊ VENCEU!";
+somVitoria();
+}else{
+mensagem.className="giro-mensagem derrota";
+mensagem.textContent="TENTE NOVAMENTE!";
+somTenteNovamente();
+}
+
+botao.disabled=false;
+campo.disabled=false;
+}
+
+botao.addEventListener("click",girar);
+
+/* Para ajuste das sobreposições: altere false para true. */
+const debug=false;
+if(debug){
+campo.classList.add("debug");
+botao.classList.add("debug");
+resultado.classList.add("debug");
+mensagem.classList.add("debug");
+}
+</script>
 
 <script>
 
